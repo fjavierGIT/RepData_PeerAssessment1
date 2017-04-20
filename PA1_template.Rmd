@@ -8,27 +8,36 @@ output:
 
 ## Loading and preprocessing the data
 
-```{r}
+```{r Load Data}
 myDataf <- read.csv(unz("./activity.zip", "activity.csv"), header = TRUE,
                     colClasses = c("integer", "Date", "numeric"), sep = ",",
                     na.strings = "NA", quote = "\"")
 ```
 
-
 ## What is mean total number of steps taken per day?
 
+Histogram of the total number of steps taken each day
 
-```{r}
+```{r Histogram steps x day}
 myDataf.steps <- aggregate(steps ~ date, myDataf, sum)
 with(myDataf.steps, barplot(myDataf.steps$steps,
                             names.arg=myDataf.steps$date, xlab = "Date", ylab ="Steps",
                             col="red", density = 20))
 ```
 
-
+Mean and median number of steps taken each day
+```{r Mean + Median steps x day}
+mean(myDataf.steps$steps, na.rm = TRUE)
+median(myDataf.steps$steps, na.rm = TRUE)
+```
 
 ## What is the average daily activity pattern?
 
+Time series plot of the average number of steps taken
+```{r  Plot Avg steps}
+steps.interval <- aggregate(steps ~ interval, activity, mean)
+
+```
 
 
 ## Imputing missing values
