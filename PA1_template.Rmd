@@ -1,18 +1,18 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
 output: 
-  html_document:
+   html_document:
     keep_md: true
 ---
 
-```{r Loads libraries}
+```{r load_packages, include=FALSE}
 library(knitr)
 library(lattice)
 ```
 
 ## Loading and preprocessing the data
 
-```{r Load Data}
+```{r Loads Data}
 myDataf <- read.csv(unz("./activity.zip", "activity.csv"), header = TRUE,
                     colClasses = c("integer", "Date", "numeric"), sep = ",",
                     na.strings = "NA", quote = "\"")
@@ -110,3 +110,4 @@ myDataf.filled.average <- aggregate(steps ~ interval + weekday, myDataf.filled, 
 xyplot(steps ~ interval | weekday, data = myDataf.filled.average, 
        layout = c(1, 2), type='l', ylab = "Number of steps")
 ```
+

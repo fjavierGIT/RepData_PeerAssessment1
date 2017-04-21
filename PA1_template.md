@@ -1,10 +1,6 @@
 # Reproducible Research: Peer Assessment 1
 
 
-```r
-library(knitr)
-library(lattice)
-```
 
 ## Loading and preprocessing the data
 
@@ -192,3 +188,4 @@ xyplot(steps ~ interval | weekday, data = myDataf.filled.average,
 ```
 
 ![](PA1_template_files/figure-html/Panel Plot Weekdays vs Weekend-1.png)<!-- -->
+
