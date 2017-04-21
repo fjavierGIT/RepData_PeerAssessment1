@@ -6,7 +6,6 @@ library(knitr)
 library(lattice)
 ```
 
-
 ## Loading and preprocessing the data
 
 
@@ -14,6 +13,7 @@ library(lattice)
 myDataf <- read.csv(unz("./activity.zip", "activity.csv"), header = TRUE,
                     colClasses = c("integer", "Date", "numeric"), sep = ",",
                     na.strings = "NA", quote = "\"")
+myDataf$id <- 1:nrow(myDataf) #creates id column. will help order later
 ```
 
 ## What is mean total number of steps taken per day?
@@ -23,23 +23,22 @@ Histogram of the total number of steps taken each day
 
 ```r
 myDataf.steps <- aggregate(steps ~ date, myDataf, sum)
-kable(head(myDataf.steps))
+head(myDataf.steps)
 ```
 
-
-
-date          steps
------------  ------
-2012-10-02      126
-2012-10-03    11352
-2012-10-04    12116
-2012-10-05    13294
-2012-10-06    15420
-2012-10-07    11015
+```
+##         date steps
+## 1 2012-10-02   126
+## 2 2012-10-03 11352
+## 3 2012-10-04 12116
+## 4 2012-10-05 13294
+## 5 2012-10-06 15420
+## 6 2012-10-07 11015
+```
 
 ```r
-with(myDataf.steps, plot(date,steps, type="h",
-                    xlab = "Date", ylab ="Steps",
+with(myDataf.steps, hist(steps,breaks=seq(from=0, to=25000, by=2500),
+                    ylim = c(0,30),xlab = "Total Steps",
                     col="red", main = "Histogram of total steps by day"))
 ```
 
@@ -110,51 +109,50 @@ We will fill in all missing NAs with the average number of steps in the same 5-m
 
 
 ```r
-myDataf.filled <- myDataf                   #new data frame
-myDataf.filled$id <- 1:nrow(myDataf.filled) #creates id column. will help order later
-newNA <- merge(myDataf.filled[NA.list,], myDataf.steps.average, by="interval", sort = F) #add means 2 NAs
-newNA <-  newNA[order(newNA$id), ]          #re-order
-myDataf.filled$steps[NA.list] <- newNA$steps.y  #filled data frame
-myDataf.filled$id <- NULL                   #drops id column
-kable(head(myDataf.filled))                 #shows new data
+myDataf.filled <- merge(myDataf[NA.list,], 
+                        myDataf.steps.average, by="interval", sort = F) #adds means column 2 NAs subset
+myDataf.filled$steps <- myDataf.filled$steps.y                          #adds new value to NAs
+myDataf.filled$steps.x <- NULL; myDataf.filled$steps.y <- NULL          #drops extra columns
+myDataf.filled <- rbind(myDataf.filled,myDataf[!is.na(myDataf$steps),]) #adds non NAs entries
+myDataf.filled <-  myDataf.filled[order(myDataf.filled$id), ]           #re-order
+myDataf.filled$id <- NULL                                               #drops id column
+head(myDataf.filled)                                                    #shows new data
 ```
 
-     steps  date          interval
-----------  -----------  ---------
- 1.7169811  2012-10-01           0
- 0.3396226  2012-10-01           5
- 0.1320755  2012-10-01          10
- 0.1509434  2012-10-01          15
- 0.0754717  2012-10-01          20
- 2.0943396  2012-10-01          25
+```
+##    interval       date     steps
+## 1         0 2012-10-01 1.7169811
+## 10        5 2012-10-01 0.3396226
+## 17       10 2012-10-01 0.1320755
+## 29       15 2012-10-01 0.1509434
+## 33       20 2012-10-01 0.0754717
+## 45       25 2012-10-01 2.0943396
+```
 
-4. Histogram of the total number of steps taken each day after missing values are imputed
+4. Histogram of the total number of steps taken each day after missing values are imputed. Calculate and report the mean and median total number of steps taken per day
 
 ```r
 myDataf.filled.steps <- aggregate(steps ~ date, myDataf.filled, sum)
-kable(head(myDataf.filled.steps))
+head(myDataf.filled.steps)
 ```
 
-
-
-date             steps
------------  ---------
-2012-10-01    10766.19
-2012-10-02      126.00
-2012-10-03    11352.00
-2012-10-04    12116.00
-2012-10-05    13294.00
-2012-10-06    15420.00
+```
+##         date    steps
+## 1 2012-10-01 10766.19
+## 2 2012-10-02   126.00
+## 3 2012-10-03 11352.00
+## 4 2012-10-04 12116.00
+## 5 2012-10-05 13294.00
+## 6 2012-10-06 15420.00
+```
 
 ```r
-with(myDataf.filled.steps, plot(date,steps, type="h",
-                    xlab = "Date", ylab ="Steps",
+with(myDataf.filled.steps, hist(steps,breaks=seq(from=0, to=25000, by=2500),
+                    ylim = c(0,30), xlab = "Total Steps",
                     col="red", main = "Histogram of total steps by day (Missing Values Imputed)"))
 ```
 
 ![](PA1_template_files/figure-html/Histogram missing imputed-1.png)<!-- -->
-
- 5. Calculate and report the mean and median total number of steps taken per day
 
 ```r
 mean(myDataf.filled.steps$steps, na.rm = TRUE)
@@ -171,6 +169,7 @@ median(myDataf.filled.steps$steps, na.rm = TRUE)
 ```
 ## [1] 10766.19
 ```
+ As a result of the method used to fill in the invalid data, the calculated mean after imputation of the new values has not changed (10766,19). On the other hand, the median did change (10765 -> 10766,19), equating to the mean.
  
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -193,4 +192,3 @@ xyplot(steps ~ interval | weekday, data = myDataf.filled.average,
 ```
 
 ![](PA1_template_files/figure-html/Panel Plot Weekdays vs Weekend-1.png)<!-- -->
-
